@@ -1,4 +1,5 @@
 fitz
+PyMuPDF
 pdfplumber==0.11.0
 python_dateutil==2.8.2
 python_docx==1.1.2
