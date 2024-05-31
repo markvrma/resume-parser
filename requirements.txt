@@ -1,4 +1,4 @@
-fitz==0.0.1.dev2
+fitz
 pdfplumber==0.11.0
 python_dateutil==2.8.2
 python_docx==1.1.2
