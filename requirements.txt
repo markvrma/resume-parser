@@ -5,3 +5,6 @@ python_docx==1.1.2
 streamlit==1.28.2
 transformers==4.41.1
 sentencepiece
+torch
+torchvision
+torchaudio
