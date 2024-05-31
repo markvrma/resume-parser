@@ -1,0 +1,70 @@
+{
+    "Job History": [
+        "Banach Technologies",
+        "Singapore (Remote)",
+        "ML Developer",
+        "April 2024 – Present",
+        "Currently working on implementing trading strategies, and optimizing code to reduce processing times",
+        "Writing and implementing ML models from scratch to work with stock market APIs to make accurate hedging",
+        "strategies.",
+        "Writing unit test cases for the different libraries already created for different trading strategies.",
+        "Alemeno",
+        "Maharashtra (Remote)",
+        "Software/ML Developer",
+        "July 2023 – Present",
+        "Led robust data preprocessing for semantic segmentation models in rural landscapes using raster data",
+        "Spearheaded implementation and optimization of cutting-edge computer vision algorithms (e.g., Douglas Peuker,",
+        "Jarvis March) on scalable systems",
+        "Proficiently manipulated GIS raster data, led strategic refactoring, and created unit tests for optimized Python",
+        "applications",
+        "Successfully deployed Django apps on AWS, expert in cloud infrastructure management and engineered end-to-",
+        "end CI/CD pipelines for seamless integration and continuous delivery",
+        "Bewgle",
+        "Bengaluru (Remote)",
+        "Data Scientist",
+        "May 2022 – July 2022",
+        "Leveraged Python libraries and NLP techniques to generate insightful visualizations and predictions on product",
+        "topics using proprietary Bewgle software datasets. Extracted valuable insights on Amazon products across",
+        "diverse verticals through comprehensive analysis of product reviews.",
+        "Automated data pre-processing using efficient Bash and Python scripts, streamlining workflows and enhancing",
+        "overall efficiency. Achieved a 90 percent reduction in dataset redundancy by optimizing information",
+        "extraction processes."
+    ],
+    "Education": [
+        "IIITM Gwalior",
+        "Madhya Pradesh, India",
+        "Bachelors, Computer Science. SGPA 7.3",
+        "Graduation Date : 2024",
+        "Relevant Coursework: Artificial Intelligence, Statistics, Cloud Computing"
+    ],
+    "Skills": [
+        "Libraries: Pytorch, OpenCV, Pandas, Rasterio, Matplotlib, Tensorflow",
+        "Tools: Docker, AWS Sagemaker, Kubernetes, MLFlow, Streamlit, Git, Linux",
+        "Contributions/Certifications: DevOps on AWS Specialization,GCP Network Deployment,Opensource Contribu-",
+        "tor @PyMC"
+    ],
+    "Accomplishments": [
+        "ResearchMate - Community Rooms",
+        "Django, Kubernetes",
+        "May 2023 – June 2023",
+        "Created a Discord like interface where users can create rooms to interact with other",
+        "Wrote test cases and implemented CI/CD pipelines",
+        "Implemented signup, signin, messaging, room creation, post creation",
+        "Medical Waste Classification App",
+        "Tensorflow, Javascript",
+        "May 2023 – June 2023",
+        "Trained a deep learning model to classify different medical waste into one of three categories with an accuracy",
+        "of 98.4%.",
+        "Created a web app incorporating the model using Tensorflowjs for users to upload images to be classified.",
+        "Published paper in IEEE Xplore - Medical Waste Classification using CNNs",
+        "Miscellaneous"
+    ],
+    "Misc": {},
+    "Contact Info": {
+        "Email": "markvrma@gmail.com",
+        "Contact": [
+            "Mark Verma",
+            "IIIT Gwalior markvrma@gmail.com +919302153281 Linkedin - markvrma"
+        ]
+    }
+}
