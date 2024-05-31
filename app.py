@@ -1,5 +1,3 @@
-from pydoc import describe
-import gradio as gr
 from main import Main
 import streamlit as st
 import os
