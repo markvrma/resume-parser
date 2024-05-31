@@ -2,7 +2,8 @@ import re
 import os
 import logging
 import pdfplumber
-import fitz
+import pymupdf
+# import fitz
 import docx
 
 class ResumeReader:
@@ -36,7 +37,7 @@ class ResumeReader:
 
         pdf = pdfplumber.open(pdf_file)
         raw_text= ""
-        with fitz.open(pdf_file) as doc:
+        with pymupdf.open(pdf_file) as doc:
             for page in doc:
                 raw_text += page.get_text()
 
