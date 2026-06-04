@@ -1,0 +1,11 @@
+# Never commit resumes. This repo is public and resumes are PII.
+*.pdf
+*.docx
+*.doc
+temp/
+results/
+node_modules/
+.vercel
+.DS_Store
+__pycache__/
+*.pyc
