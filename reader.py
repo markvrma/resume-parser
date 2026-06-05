@@ -1,7 +1,6 @@
 import re
 import os
 import logging
-import pdfplumber
 import pymupdf
 # import fitz
 import docx
@@ -35,13 +34,11 @@ class ResumeReader:
 
     def convert_pdf_to_txt(self, pdf_file):
 
-        pdf = pdfplumber.open(pdf_file)
         raw_text= ""
         with pymupdf.open(pdf_file) as doc:
             for page in doc:
                 raw_text += page.get_text()
 
-        pdf.close()                
       
         try:
             full_string = re.sub(r'\n+', '\n', raw_text)
