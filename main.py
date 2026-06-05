@@ -9,10 +9,10 @@ class Main:
     def __init__(self):
         # initialize models
         models = Models()
-        ner, ner_dates, zero_shot_classifier = models.load_trained_models()
+        zero_shot_classifier = models.load_trained_models()
         # initialize instances
         self.reader = ResumeReader()
-        self.parser = ResumeParser(ner, ner_dates, zero_shot_classifier) 
+        self.parser = ResumeParser(zero_shot_classifier)
 
     def parse_cv(self, file_path):
          # read contents of resume 

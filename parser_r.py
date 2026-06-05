@@ -9,11 +9,10 @@ class ResumeParser:
     '''
     init: intializes the models, segmenter, ner, ner_dates, zero_shot_classifier, and tagger
     '''
-    def __init__(self, ner, ner_dates, zero_shot_classifier): #,tagger
+    def __init__(self, zero_shot_classifier):
         self.models = Models()
         self.segmenter = ResumeSegmenter(zero_shot_classifier)
         # self.ner, self.ner_dates, self.zero_shot_classifier, self.tagger = ner, ner_dates, zero_shot_classifier, tagger 
-        self.ner, self.ner_dates, self.zero_shot_classifier = ner, ner_dates, zero_shot_classifier
         self.parsed_cv = {}
 
     def parse(self, resume_lines):
