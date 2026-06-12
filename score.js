@@ -127,3 +127,64 @@ const isHeading = (line) =>
 
 const BULLET_MARK = /^[•\-–—*·▪◦]\s*/;
 
+export function parseResume(rawText) {
+  const text = (rawText || "")
+    .replace(/\r/g, "\n")
+    .replace(/\u00a0/g, " ") // non-breaking space
+    .replace(/\uf0b7/g, "\u2022") // Word's private-use bullet glyph
+    .replace(/\(cid:\d{1,3}\)/g, " "); // pdf font-encoding leakage
+
+  const lines = text
+    .split("\n")
+    .map((l) => l.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+
+  // Locate headings. Each becomes a boundary; everything until the next
+  // boundary belongs to it.
+  const marks = [];
+  lines.forEach((line, i) => {
+    if (!isHeading(line)) return;
+    for (const [name, re] of Object.entries(SECTION_PATTERNS)) {
+      if (re.test(line)) {
+        marks.push({ name, index: i });
+        break;
+      }
+    }
+  });
+
+  const sections = {};
+  marks.forEach((mark, i) => {
+    const end = i + 1 < marks.length ? marks[i + 1].index : lines.length;
+    const body = lines.slice(mark.index + 1, end);
+    // A resume can repeat a family (two "Projects" blocks); merge rather than
+    // let the later one silently win.
+    sections[mark.name] = (sections[mark.name] || []).concat(body);
+  });
+
+  // Bullets come from the sections where achievements actually live. With no
+  // recognisable headings at all, fall back to every substantial line so the
+  // resume still gets scored instead of silently reading as empty.
+  const bulletSource = marks.length
+    ? [...(sections.experience || []), ...(sections.projects || [])]
+    : lines;
+
+  const bullets = bulletSource
+    .filter((l) => BULLET_MARK.test(l) || l.length > 40)
+    .map((l) => l.replace(BULLET_MARK, "").trim())
+    .filter((l) => l.length > 15);
+
+  const contact = {};
+  for (const [field, re] of Object.entries(CONTACT_PATTERNS)) {
+    const m = text.match(re);
+    if (m) contact[field] = m[0];
+  }
+
+  return {
+    text,
+    lines,
+    sections,
+    bullets,
+    contact,
+    words: text.split(/\s+/).filter(Boolean).length,
+  };
+}
