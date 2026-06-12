@@ -89,3 +89,41 @@ export const BENCHMARK = {
   // Sections expected to be present and findable by an ATS.
   expectedSections: ["experience", "skills", "education"],
 };
+
+// ---------------------------------------------------------------------------
+// Extraction: raw resume text -> doc
+// ---------------------------------------------------------------------------
+// Lives here rather than in app.js because it is pure string work with no DOM
+// and no pdf.js, which means node:test can exercise it directly. app.js only
+// owns "PDF bytes -> text" and "doc -> pixels".
+
+// One alternation per section family. The old Python version carried 248 lines
+// of synonym tuples across six families; four families and the common synonyms
+// cover the same resumes.
+const SECTION_PATTERNS = {
+  experience: /^(work\s+)?(experience|employment|work history|professional (experience|background))/i,
+  skills: /^(technical\s+|core\s+)?(skills|technologies|proficiencies|competencies|tech stack)/i,
+  education: /^(education|academic)/i,
+  projects: /^(personal\s+|side\s+)?(projects|portfolio)/i,
+  summary: /^(summary|objective|profile|about)/i,
+  awards: /^(awards|achievements|honors|certifications|publications)/i,
+};
+
+const CONTACT_PATTERNS = {
+  email: /[\w.+-]+@[\w-]+\.[\w.-]+/,
+  // Deliberately loose: international formats vary far too much to pin down,
+  // and a false positive here costs less than telling someone their real phone
+  // number is missing.
+  phone: /(\+?\d{1,3}[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/,
+  linkedin: /linkedin\.com\/[\w/-]+/i,
+  github: /github\.(com|io)\/[\w/-]+/i,
+};
+
+// A heading is short, has no trailing sentence punctuation, and is not itself a
+// bullet. Length is the load-bearing check — "Experience designing systems..."
+// is a bullet, "EXPERIENCE" is a heading.
+const isHeading = (line) =>
+  line.length <= 45 && !/[.,;]$/.test(line) && !/^[•\-–*·]/.test(line);
+
+const BULLET_MARK = /^[•\-–—*·▪◦]\s*/;
+
