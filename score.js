@@ -188,3 +188,42 @@ export function parseResume(rawText) {
     words: text.split(/\s+/).filter(Boolean).length,
   };
 }
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+const clamp100 = (n) => Math.max(0, Math.min(100, Math.round(n)));
+
+// Ratio against a target, where hitting the target is 100. Going beyond the
+// target does not earn more than 100 — there is no prize for a resume that is
+// 100% numbers.
+const ratioScore = (actual, target) => clamp100((actual / target) * 100);
+
+// Years read as bare numbers and would inflate the impact score on every bullet
+// that happens to mention one, so they are removed before looking for figures.
+const stripYears = (s) => s.replace(/\b(19|20)\d{2}\b/g, " ");
+
+// A "figure" is a percentage, a currency amount, a magnitude with a unit, a
+// multiplier, or any bare number of two digits or more. Single digits are
+// excluded: "3 microservices" is not the kind of quantification that matters,
+// and single digits appear constantly in version numbers and list markers.
+const FIGURE = new RegExp(
+  [
+    "\\d+(?:\\.\\d+)?\\s*%",
+    "[$£€]\\s?\\d",
+    "\\d+(?:\\.\\d+)?\\s*[kmb]\\b",
+    "\\d+(?:\\.\\d+)?\\s*x\\b",
+    "\\d+(?:\\.\\d+)?\\s*(?:ms|sec|seconds?|mins?|minutes?|hours?|days?|weeks?|months?|gb|tb|mb|qps|rps|req/s|users?|customers?|clients?|requests?|records?|rows?|engineers?|people|teams?)\\b",
+    "\\b\\d{2,}\\b",
+  ].join("|"),
+  "i",
+);
+
+export const hasFigure = (line) => FIGURE.test(stripYears(line));
+
+const startsWithOwnershipVerb = (line, verbs) => {
+  const first = line.toLowerCase().replace(/^[^a-z]+/, "").split(/\s+/)[0] || "";
+  return verbs.includes(first.replace(/[^a-z]/g, ""));
+};
+
