@@ -227,3 +227,34 @@ const startsWithOwnershipVerb = (line, verbs) => {
   return verbs.includes(first.replace(/[^a-z]/g, ""));
 };
 
+// ---------------------------------------------------------------------------
+// Dimension scorers
+// ---------------------------------------------------------------------------
+// Each returns { score, detail, tip }. `verdict` is deliberately NOT stored —
+// it is a threshold on score, so the renderer derives it.
+
+export function scoreImpact(doc, bench = BENCHMARK) {
+  const bullets = doc.bullets || [];
+  if (!bullets.length) {
+    return {
+      score: 0,
+      detail: "No experience bullets found.",
+      tip: "Break your experience into bullet points — a wall of prose is hard for both recruiters and ATS parsers to read.",
+    };
+  }
+
+  const quantified = bullets.filter(hasFigure);
+  const ratio = quantified.length / bullets.length;
+  const score = ratioScore(ratio, bench.impactTarget);
+  const pct = Math.round(ratio * 100);
+
+  return {
+    score,
+    detail: `${quantified.length} of ${bullets.length} bullets (${pct}%) contain a concrete figure. Benchmark: ${Math.round(bench.impactTarget * 100)}%.`,
+    tip:
+      score >= 90
+        ? "Strong. Your bullets show outcomes, not duties."
+        : `Add numbers to ${Math.max(1, Math.ceil(bench.impactTarget * bullets.length) - quantified.length)} more bullets. Latency saved, users served, cost cut, percent faster — any real figure beats "improved performance".`,
+  };
+}
+
