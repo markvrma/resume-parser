@@ -258,3 +258,24 @@ export function scoreImpact(doc, bench = BENCHMARK) {
   };
 }
 
+export function scoreBreadth(doc, bench = BENCHMARK) {
+  const haystack = (doc.text || "").toLowerCase();
+  const covered = [];
+  const missing = [];
+
+  for (const [category, keywords] of Object.entries(bench.techCategories)) {
+    const hits = keywords.filter((k) => haystack.includes(k));
+    (hits.length ? covered : missing).push(category);
+  }
+
+  const score = ratioScore(covered.length, bench.techCategoryTarget);
+
+  return {
+    score,
+    detail: `${covered.length} of ${Object.keys(bench.techCategories).length} technology areas represented${covered.length ? ": " + covered.join(", ") : ""}. Benchmark: ${bench.techCategoryTarget}.`,
+    tip: missing.length
+      ? `Nothing found for: ${missing.join(", ")}. If you have real exposure there, name the specific tools — breadth across areas reads stronger than depth in one.`
+      : "Strong. Your stack spans every area a generalist SDE role screens for.",
+  };
+}
+
