@@ -279,3 +279,36 @@ export function scoreBreadth(doc, bench = BENCHMARK) {
   };
 }
 
+export function scoreOwnership(doc, bench = BENCHMARK) {
+  const bullets = doc.bullets || [];
+  if (!bullets.length) {
+    return {
+      score: 0,
+      detail: "No experience bullets found.",
+      tip: "Open each bullet with a verb that says what you drove.",
+    };
+  }
+
+  const owned = bullets.filter((b) => startsWithOwnershipVerb(b, bench.ownershipVerbs));
+  const ratio = owned.length / bullets.length;
+  const score = ratioScore(ratio, bench.ownershipTarget);
+
+  const text = (doc.text || "").toLowerCase();
+  const weakFound = bench.weakPhrases.filter((p) => text.includes(p));
+
+  let tip;
+  if (weakFound.length) {
+    tip = `Replace passive phrasing — found "${weakFound.slice(0, 3).join('", "')}". Recruiters read those as "was in the room".`;
+  } else if (score >= 90) {
+    tip = "Strong. Your bullets read as work you drove, not work you were near.";
+  } else {
+    tip = `Open more bullets with ownership verbs (led, designed, shipped, migrated, mentored) instead of the default "developed"/"implemented".`;
+  }
+
+  return {
+    score,
+    detail: `${owned.length} of ${bullets.length} bullets open with an ownership verb. Benchmark: ${Math.round(bench.ownershipTarget * 100)}%.`,
+    tip,
+  };
+}
+
