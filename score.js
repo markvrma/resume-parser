@@ -312,3 +312,38 @@ export function scoreOwnership(doc, bench = BENCHMARK) {
   };
 }
 
+export function scoreHygiene(doc, bench = BENCHMARK) {
+  const contact = doc.contact || {};
+  const found = bench.contactFields.filter((f) => contact[f]);
+  const sections = doc.sections || {};
+  const sectionsFound = bench.expectedSections.filter((s) => sections[s]);
+
+  const words = doc.words || 0;
+  const [lo, hi] = bench.wordRange;
+  const lengthOk = words >= lo && words <= hi;
+
+  // Three equally weighted sub-checks: reachable, parseable, right length.
+  const parts = [
+    found.length / bench.contactFields.length,
+    sectionsFound.length / bench.expectedSections.length,
+    lengthOk ? 1 : 0.4,
+  ];
+  const score = clamp100((parts.reduce((a, b) => a + b, 0) / parts.length) * 100);
+
+  const problems = [];
+  const missingContact = bench.contactFields.filter((f) => !contact[f]);
+  if (missingContact.length) problems.push(`no ${missingContact.join("/")} found`);
+  const missingSections = bench.expectedSections.filter((s) => !sections[s]);
+  if (missingSections.length) problems.push(`no clear ${missingSections.join("/")} heading`);
+  if (words < lo) problems.push(`only ${words} words — thin for a full resume`);
+  if (words > hi) problems.push(`${words} words — long for a single page`);
+
+  return {
+    score,
+    detail: `${found.length}/${bench.contactFields.length} contact channels, ${sectionsFound.length}/${bench.expectedSections.length} standard sections, ${words} words.`,
+    tip: problems.length
+      ? `Fix the basics first: ${problems.join("; ")}. These cost nothing and are what automated screens check.`
+      : "Strong. Reachable, parseable, and the right length.",
+  };
+}
+
