@@ -347,3 +347,28 @@ export function scoreHygiene(doc, bench = BENCHMARK) {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Top level
+// ---------------------------------------------------------------------------
+
+export const DIMENSIONS = [
+  { key: "impact", label: "Impact & quantification", fn: scoreImpact },
+  { key: "breadth", label: "Technical breadth", fn: scoreBreadth },
+  { key: "ownership", label: "Ownership signals", fn: scoreOwnership },
+  { key: "hygiene", label: "Structural hygiene", fn: scoreHygiene },
+];
+
+export function scoreResume(doc, bench = BENCHMARK) {
+  const dimensions = DIMENSIONS.map(({ key, label, fn }) => ({
+    key,
+    label,
+    weight: bench.weights[key],
+    ...fn(doc, bench),
+  }));
+
+  const overall = clamp100(
+    dimensions.reduce((sum, d) => sum + d.score * d.weight, 0),
+  );
+
+  return { overall, dimensions };
+}
