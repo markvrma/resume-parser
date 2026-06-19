@@ -126,3 +126,29 @@ test("bullets come from experience and projects, not from skills lists", () => {
   );
 });
 
+test("weak resume is told what is missing, not just given a number", () => {
+  for (const d of weak.dimensions) {
+    assert.ok(d.tip && d.tip.length > 20, `${d.key} has no usable tip`);
+  }
+  const hygiene = weak.dimensions.find((d) => d.key === "hygiene");
+  assert.match(hygiene.tip, /phone|linkedin|github/i);
+});
+
+test("a resume with no recognisable headings still gets scored", () => {
+  const doc = parseResume(
+    "Built a distributed cache in Go that cut read latency by 60% across 30 services.\n" +
+      "Led a team of 4 engineers delivering the billing rewrite two weeks early.",
+  );
+  assert.ok(doc.bullets.length === 2, `got ${doc.bullets.length} bullets`);
+  assert.ok(scoreResume(doc).overall > 0);
+});
+
+test("empty input scores zero without throwing", () => {
+  const result = scoreResume(parseResume(""));
+  assert.equal(result.overall, 0);
+});
+
+test("benchmark weights sum to 1", () => {
+  const total = Object.values(BENCHMARK.weights).reduce((a, b) => a + b, 0);
+  assert.ok(Math.abs(total - 1) < 1e-9, `weights sum to ${total}`);
+});
