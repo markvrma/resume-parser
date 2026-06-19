@@ -95,3 +95,34 @@ test("strong resume outscores weak resume on every dimension", () => {
     assert.ok(s > w, `${dim.key}: expected strong (${s}) > weak (${w})`);
   }
 });
+
+// --- guards on the pieces that silently rot -------------------------------
+
+test("figure detection ignores years but catches real magnitudes", () => {
+  assert.ok(hasFigure("Cut p99 latency by 45%"));
+  assert.ok(hasFigure("Served 12000 merchants"));
+  assert.ok(hasFigure("Saved $2.1M annually"));
+  assert.ok(hasFigure("Reduced build time to 90 seconds"));
+  // A bare year is not an accomplishment.
+  assert.ok(!hasFigure("Worked here from 2019 to 2022"));
+  assert.ok(!hasFigure("Improved application performance significantly"));
+});
+
+test("sections and contact are extracted from a normal resume", () => {
+  assert.ok(strongDoc.sections.experience, "experience section missing");
+  assert.ok(strongDoc.sections.skills, "skills section missing");
+  assert.ok(strongDoc.sections.education, "education section missing");
+  assert.equal(strongDoc.contact.email, "jane.okafor@example.com");
+  assert.ok(strongDoc.contact.linkedin);
+  assert.ok(strongDoc.contact.github);
+  assert.ok(strongDoc.contact.phone);
+});
+
+test("bullets come from experience and projects, not from skills lists", () => {
+  assert.ok(strongDoc.bullets.length >= 9, `got ${strongDoc.bullets.length}`);
+  assert.ok(
+    !strongDoc.bullets.some((b) => b.startsWith("Languages:")),
+    "skills lines leaked into bullets",
+  );
+});
+
