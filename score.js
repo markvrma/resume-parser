@@ -313,6 +313,17 @@ export function scoreOwnership(doc, bench = BENCHMARK) {
 }
 
 export function scoreHygiene(doc, bench = BENCHMARK) {
+  // No text at all means nothing was extracted — typically a scanned or
+  // image-only PDF. Without this guard the wrong-length branch below still pays
+  // out partial credit, and an empty document scores above zero.
+  if (!doc.words) {
+    return {
+      score: 0,
+      detail: "No text could be read from this file.",
+      tip: "If your resume is a scan or an image, paste the text in instead — there is nothing here to parse.",
+    };
+  }
+
   const contact = doc.contact || {};
   const found = bench.contactFields.filter((f) => contact[f]);
   const sections = doc.sections || {};
