@@ -45,3 +45,33 @@ function setStatus(message, isError = false) {
   els.status.classList.toggle("mv-status--error", isError);
 }
 
+// --- PDF -> text ----------------------------------------------------------
+
+async function pdfToText(file) {
+  const data = new Uint8Array(await file.arrayBuffer());
+  const pdf = await pdfjs.getDocument({ data }).promise;
+
+  const pages = Math.min(pdf.numPages, MAX_PAGES);
+  let out = "";
+
+  for (let n = 1; n <= pages; n++) {
+    const content = await (await pdf.getPage(n)).getTextContent();
+    let lastY = null;
+
+    for (const item of content.items) {
+      if (item.str === undefined) continue; // marked-content items carry no text
+      // pdf.js flags the end of a visual line itself; the y-coordinate check is
+      // the fallback for producers that never set it. Neither reconstructs
+      // multi-column layouts — see the README limitation.
+      const y = item.transform ? Math.round(item.transform[5]) : null;
+      if (lastY !== null && y !== null && Math.abs(y - lastY) > 2) out += "\n";
+      out += item.str;
+      if (item.hasEOL) out += "\n";
+      lastY = y;
+    }
+    out += "\n";
+  }
+
+  return out;
+}
+
