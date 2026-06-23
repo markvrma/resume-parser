@@ -75,3 +75,59 @@ async function pdfToText(file) {
   return out;
 }
 
+// --- rendering ------------------------------------------------------------
+
+// Bands are derived here rather than stored on the score object — a verdict is
+// just a threshold, and duplicating it into score.js would mean two places to
+// change when the wording moves.
+function band(score) {
+  if (score >= 80) return { label: "Strong", color: "var(--good)" };
+  if (score >= 55) return { label: "Developing", color: "var(--fair)" };
+  return { label: "Needs work", color: "var(--poor)" };
+}
+
+function renderDimension(dim) {
+  const { label: verdict, color } = band(dim.score);
+  const el = document.createElement("div");
+  el.className = "mv-dim";
+  el.innerHTML = `
+    <div class="mv-dim-head">
+      <span class="mv-dim-name">${dim.label}<span class="mv-verdict" style="background:${color}">${verdict}</span></span>
+      <span class="mv-dim-score">${dim.score}<span style="font-weight:400;color:var(--ink-muted)">/100</span></span>
+    </div>
+    <div class="mv-track" role="img"
+         aria-label="${dim.label}: ${dim.score} out of 100 — ${verdict}">
+      <div class="mv-fill" style="width:0%;background:${color}"></div>
+    </div>
+    <p class="mv-dim-detail"></p>
+    <p class="mv-tip"></p>
+  `;
+  // textContent, not innerHTML — detail and tip interpolate strings built from
+  // the user's own resume.
+  el.querySelector(".mv-dim-detail").textContent = dim.detail;
+  el.querySelector(".mv-tip").textContent = dim.tip;
+
+  // Width is applied after insertion so the CSS transition animates from 0.
+  requestAnimationFrame(() => {
+    el.querySelector(".mv-fill").style.width = `${dim.score}%`;
+  });
+  return el;
+}
+
+function render(result) {
+  const overall = band(result.overall);
+
+  els.heroScore.textContent = result.overall;
+  els.heroScore.style.color = overall.color;
+  els.heroVerdict.textContent = overall.label;
+  els.heroVerdict.style.color = overall.color;
+  els.heroSub.textContent =
+    `Weighted across ${result.dimensions.length} areas, benchmarked against ${BENCHMARK.label}.`;
+
+  els.dims.replaceChildren(...result.dimensions.map(renderDimension));
+
+  els.inputView.hidden = true;
+  els.resultsView.hidden = false;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
