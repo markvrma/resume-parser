@@ -131,3 +131,59 @@ function render(result) {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
+// --- flow -----------------------------------------------------------------
+
+function scoreText(text) {
+  const doc = parseResume(text);
+  if (!doc.words) {
+    setStatus("No text found. Paste your resume text in instead.", true);
+    els.pasteField.hidden = false;
+    return;
+  }
+  setStatus("");
+  render(scoreResume(doc));
+}
+
+async function handleFile(file) {
+  if (!file) return;
+
+  const isPdf = /\.pdf$/i.test(file.name) || file.type === "application/pdf";
+  const isTxt = /\.txt$/i.test(file.name) || file.type === "text/plain";
+
+  if (!isPdf && !isTxt) {
+    setStatus(
+      "That file type isn't supported. Export your resume as a PDF, or paste the text in below.",
+      true,
+    );
+    els.pasteField.hidden = false;
+    return;
+  }
+
+  setStatus("Reading your resume…");
+
+  try {
+    const text = isTxt ? await file.text() : await pdfToText(file);
+
+    if (text.trim().length < MIN_CHARS) {
+      setStatus(
+        "Almost no text came out of that PDF — it's likely a scan or an image. Paste your resume text in below instead.",
+        true,
+      );
+      els.pasteField.hidden = false;
+      els.paste.focus();
+      return;
+    }
+
+    scoreText(text);
+  } catch (err) {
+    const encrypted = err && /password/i.test(err.message || "");
+    setStatus(
+      encrypted
+        ? "That PDF is password-protected. Save an unprotected copy, or paste the text in below."
+        : `Couldn't read that PDF (${err.message || err}). Try pasting the text in below.`,
+      true,
+    );
+    els.pasteField.hidden = false;
+  }
+}
+
