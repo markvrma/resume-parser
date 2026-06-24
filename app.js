@@ -187,3 +187,45 @@ async function handleFile(file) {
   }
 }
 
+// --- events ---------------------------------------------------------------
+
+els.file.addEventListener("change", (e) => handleFile(e.target.files[0]));
+
+els.pasteToggle.addEventListener("click", () => {
+  els.pasteField.hidden = !els.pasteField.hidden;
+  if (!els.pasteField.hidden) els.paste.focus();
+});
+
+els.scorePaste.addEventListener("click", () => {
+  const text = els.paste.value.trim();
+  if (text.length < MIN_CHARS) {
+    setStatus("That's too short to score — paste the full resume text.", true);
+    return;
+  }
+  scoreText(text);
+});
+
+els.again.addEventListener("click", () => {
+  els.resultsView.hidden = true;
+  els.inputView.hidden = false;
+  els.file.value = "";
+  els.paste.value = "";
+  setStatus("");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
+for (const type of ["dragenter", "dragover"]) {
+  els.drop.addEventListener(type, (e) => {
+    e.preventDefault();
+    els.drop.classList.add("is-over");
+  });
+}
+
+for (const type of ["dragleave", "drop"]) {
+  els.drop.addEventListener(type, (e) => {
+    e.preventDefault();
+    els.drop.classList.remove("is-over");
+  });
+}
+
+els.drop.addEventListener("drop", (e) => handleFile(e.dataTransfer.files[0]));
