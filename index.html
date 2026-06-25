@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resume Check — how your resume compares to a strong SDE profile</title>
+<meta name="description" content="Score your software engineering resume against a documented hiring rubric. Runs entirely in your browser — nothing is uploaded.">
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232563eb'/%3E%3Cpath d='M9 9h14M9 15h14M9 21h8' stroke='white' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
+</head>
+<body>
+<div class="wrap">
+
+  <header class="mv-masthead">
+    <h1>Resume Check</h1>
+    <p class="mv-tagline">See how your resume measures against a strong software engineering profile.</p>
+    <span class="mv-privacy">Runs in your browser — your resume is never uploaded</span>
+  </header>
+
+  <!-- ---------------------------------------------------------------- -->
+  <!-- State 1: input                                                    -->
+  <!-- ---------------------------------------------------------------- -->
+  <main>
+  <section id="input-view" class="mv-card">
+    <h2 class="mv-section-title">Upload your resume</h2>
+
+    <div class="mv-field">
+      <label class="mv-label" for="field">What field are you in?</label>
+      <select id="field">
+        <option value="swe" selected>Computer Science / Software Engineering</option>
+        <option value="ds" disabled>Data Science &amp; ML — coming soon</option>
+        <option value="pm" disabled>Product Management — coming soon</option>
+        <option value="design" disabled>Design — coming soon</option>
+        <option value="finance" disabled>Finance — coming soon</option>
+      </select>
+    </div>
+
+    <div class="mv-field">
+      <span class="mv-label" id="file-label">Your resume</span>
+      <!-- A label styled as the drop zone: clicking it opens the picker with
+           no JS, and it stays keyboard-reachable through the input itself. -->
+      <label class="mv-drop" id="drop" for="file">
+        <strong>Choose a PDF, or drop one here</strong>
+        Nothing leaves this page.
+      </label>
+      <input id="file" type="file" accept="application/pdf,.pdf,.txt" class="mv-sr">
+    </div>
+
+    <button type="button" class="mv-linkbtn" id="paste-toggle">
+      Scanned or unusual PDF? Paste the text instead
+    </button>
+
+    <div class="mv-field" id="paste-field" hidden style="margin-top:1.2rem">
+      <label class="mv-label" for="paste">Paste your resume text</label>
+      <textarea id="paste" rows="10" placeholder="Paste the full text of your resume, including section headings…"></textarea>
+      <div class="mv-actions">
+        <button type="button" class="mv-btn" id="score-paste">Score this text</button>
+      </div>
+    </div>
+
+    <p class="mv-status" id="status" hidden role="status" aria-live="polite"></p>
+  </section>
+
+  <!-- ---------------------------------------------------------------- -->
+  </main>
+
+</div>
+<script type="module" src="app.js"></script>
+</body>
+</html>
