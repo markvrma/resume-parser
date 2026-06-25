@@ -62,7 +62,30 @@
   </section>
 
   <!-- ---------------------------------------------------------------- -->
+  <!-- State 2: results                                                  -->
+  <!-- ---------------------------------------------------------------- -->
+  <section id="results-view" class="mv-card" hidden>
+    <div class="mv-hero">
+      <div class="mv-hero-number"><span id="hero-score">0</span><span> / 100</span></div>
+      <div class="mv-hero-verdict" id="hero-verdict"></div>
+      <p class="mv-hero-sub" id="hero-sub"></p>
+    </div>
+
+    <h2 class="mv-section-title">How each area scores</h2>
+    <div id="dims"></div>
+
+    <div class="mv-actions">
+      <button type="button" class="mv-btn" id="again">Check another resume</button>
+    </div>
+  </section>
   </main>
+
+  <p class="mv-foot">
+    Scored against a hand-written rubric derived from public hiring guidance —
+    <strong>not</strong> from real people's resumes. Read the
+    <a href="https://github.com/markvrma/resume-parser#methodology">methodology and its limits</a>.
+    <br>Built by <a href="https://markvrma.github.io">Mark Verma</a>.
+  </p>
 
 </div>
 <script type="module" src="app.js"></script>
