@@ -1,0 +1,73 @@
+/* ==========================================================================
+   Resume Check
+
+   Design language ported from markvrma.github.io (_sass/_custom.scss): the
+   mv- component set — accent-underlined section titles, 10px cards with a
+   gradient top-border that wipes in on hover, pill tags.
+
+   The portfolio's indigo/cyan (#5b5fef / #06b6d4) is swapped for a
+   resume-friendly palette: ink navy, slate-blue accent, warm paper ground.
+
+   Dark mode follows the OS only. The portfolio ships a manual toggle plus a
+   pre-paint anti-FOUC script; for a single-page tool nobody revisits, that is
+   ~25 lines buying nothing.
+   ========================================================================== */
+
+:root {
+  color-scheme: light dark;
+
+  --ink: #1e293b;
+  --ink-muted: #5b6980;
+  --paper: #faf9f7;
+  --surface: #ffffff;
+  --border: #e4e1dc;
+
+  --accent: #2563eb;
+  --accent-2: #0f766e;
+
+  /* Status ramp. Reserved for score bands — never reused as series colors.
+     Always rendered alongside a text verdict so the band never rides on
+     color alone. */
+  --good: #0f766e;
+  --fair: #b45309;
+  --poor: #b91c1c;
+
+  --shadow: 0 12px 24px rgba(30, 41, 59, 0.08);
+  --font: -apple-system, ".SFNSText-Regular", "San Francisco", "Roboto",
+    "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Dark steps are selected against the dark surface, not flipped from the
+       light ones — an inverted #0f766e is unreadable on #14161a. */
+    --ink: #e8e8ea;
+    --ink-muted: #9aa0a8;
+    --paper: #14161a;
+    --surface: #1c1f24;
+    --border: #2e333b;
+
+    --accent: #60a5fa;
+    --accent-2: #2dd4bf;
+
+    --good: #14b8a6;
+    --fair: #f59e0b;
+    --poor: #f87171;
+
+    --shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 0 1.2rem 4rem;
+  background: var(--paper);
+  color: var(--ink);
+  font: 16px/1.6 var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap { max-width: 780px; margin: 0 auto; }
+
