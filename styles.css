@@ -236,3 +236,91 @@ option:disabled { color: var(--ink-muted); }
 
 .mv-status--error { border-left-color: var(--poor); color: var(--ink); }
 
+/* --- hero score --------------------------------------------------------- */
+
+.mv-hero {
+  text-align: center;
+  padding: 0.6rem 0 1.8rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.8rem;
+}
+
+.mv-hero-number {
+  font-size: 4.6rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.mv-hero-number span { font-size: 0.34em; font-weight: 600; color: var(--ink-muted); }
+
+.mv-hero-verdict {
+  font-size: 1.1em;
+  font-weight: 700;
+  margin-top: 0.3em;
+}
+
+.mv-hero-sub { color: var(--ink-muted); font-size: 0.92em; margin-top: 0.4em; }
+
+/* --- score bars --------------------------------------------------------- */
+/* Magnitude against a fixed 0–100 scale, so the bar is the whole chart: no
+   axis, no gridlines, no legend (one series). There is no benchmark reference
+   line because scores are already normalised so that meeting the benchmark IS
+   100 — a marker would sit at the end of every track. The raw figure and the
+   benchmark it is measured against are stated in .mv-dim-detail instead.
+   Colour carries the band, and .mv-verdict repeats it as text so the band is
+   never conveyed by colour alone. */
+
+.mv-dim { margin-bottom: 1.7rem; }
+
+.mv-dim-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.8em;
+  margin-bottom: 0.5em;
+}
+
+.mv-dim-name { font-weight: 700; }
+
+.mv-dim-score {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 1.05em;
+}
+
+.mv-verdict {
+  font-size: 0.7em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2em 0.6em;
+  border-radius: 999px;
+  margin-left: 0.5em;
+  vertical-align: middle;
+  color: #fff;
+}
+
+.mv-track {
+  position: relative;
+  height: 12px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--ink) 8%, var(--surface));
+  overflow: hidden;
+}
+
+.mv-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mv-dim-detail { font-size: 0.85em; color: var(--ink-muted); margin: 0.6em 0 0; }
+
+.mv-tip {
+  font-size: 0.9em;
+  margin: 0.5em 0 0;
+  padding-left: 0.9em;
+  border-left: 2px solid var(--border);
+}
+
