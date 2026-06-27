@@ -324,3 +324,38 @@ option:disabled { color: var(--ink-muted); }
   border-left: 2px solid var(--border);
 }
 
+/* --- pills & footer ----------------------------------------------------- */
+
+.mv-pill-row { display: flex; flex-wrap: wrap; gap: 0.5em; margin-top: 0.8em; }
+
+.mv-pill {
+  font-size: 0.8em;
+  padding: 0.3em 0.8em;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--ink-muted);
+}
+
+.mv-actions { display: flex; gap: 0.8em; flex-wrap: wrap; margin-top: 2rem; }
+
+.mv-foot {
+  margin-top: 2.5rem;
+  font-size: 0.82em;
+  color: var(--ink-muted);
+  text-align: center;
+  line-height: 1.7;
+}
+
+.mv-foot a { color: var(--accent); }
+
+[hidden] { display: none !important; }
+
+.mv-sr {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
