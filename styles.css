@@ -1,134 +1,193 @@
 /* ==========================================================================
    Resume Check
 
-   Design language ported from markvrma.github.io (_sass/_custom.scss): the
-   mv- component set — accent-underlined section titles, 10px cards with a
-   gradient top-border that wipes in on hover, pill tags.
+   Design language taken from markvrma.github.io/assets/css/retro.css — the
+   16-bit desktop styling that actually ships on the portfolio, not the
+   indigo/cyan mv- set in _sass/_custom.scss that retro.css loads after and
+   overrides.
 
-   The portfolio's indigo/cyan (#5b5fef / #06b6d4) is swapped for a
-   resume-friendly palette: ink navy, slate-blue accent, warm paper ground.
+   Its rules, quoted from that file's header: "hard black lines, eggshell or
+   dull black backgrounds, colour only as an accent, emphasis carried by
+   weight, italics and underlines rather than by colour."
 
-   Dark mode follows the OS only. The portfolio ships a manual toggle plus a
-   pre-paint anti-FOUC script; for a single-page tool nobody revisits, that is
-   ~25 lines buying nothing.
+   So: one monospace stack for everything, border-radius 0 throughout, 2px
+   lines on controls and 3px on panels, offset shadows with no blur, and
+   inversion — ink ground, page-coloured text — as the hover state rather
+   than a colour shift.
+
+   Tokens are the portfolio's --rt-* variables verbatim, renamed only to drop
+   the prefix, so the two stay in step if that palette moves.
+
+   Dark mode follows the OS only. The portfolio also ships a manual toggle and
+   a pre-paint anti-FOUC script; for a single-page tool nobody revisits, that
+   is ~25 lines buying nothing.
    ========================================================================== */
 
 :root {
   color-scheme: light dark;
 
-  --ink: #1e293b;
-  --ink-muted: #5b6980;
-  --paper: #faf9f7;
-  --surface: #ffffff;
-  --border: #e4e1dc;
+  --bg: #f0ebe0;
+  --surface: #faf7ef;
+  --sunk: #e5dfd1;
+  --ink: #14120f;
+  --line: #14120f;
+  --muted: #5f584c;
+  --accent: #a8341f;
+  --accent-2: #1b5f57;
 
-  --accent: #2563eb;
-  --accent-2: #0f766e;
+  --shadow: 4px 4px 0 var(--line);
+  --shadow-sm: 3px 3px 0 var(--line);
 
-  /* Status ramp. Reserved for score bands — never reused as series colors.
-     Always rendered alongside a text verdict so the band never rides on
-     color alone. */
-  --good: #0f766e;
-  --fair: #b45309;
-  --poor: #b91c1c;
-
-  --shadow: 0 12px 24px rgba(30, 41, 59, 0.08);
-  --font: -apple-system, ".SFNSText-Regular", "San Francisco", "Roboto",
-    "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font: ui-monospace, "SF Mono", "JetBrains Mono", "Roboto Mono", Menlo,
+    Consolas, "DejaVu Sans Mono", monospace;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    /* Dark steps are selected against the dark surface, not flipped from the
-       light ones — an inverted #0f766e is unreadable on #14161a. */
-    --ink: #e8e8ea;
-    --ink-muted: #9aa0a8;
-    --paper: #14161a;
-    --surface: #1c1f24;
-    --border: #2e333b;
+    --bg: #17171a;
+    --surface: #202027;
+    --sunk: #16161b;
+    --ink: #ece6da;
+    --line: #ece6da;
+    --muted: #a39b8c;
+    --accent: #e2765f;
+    --accent-2: #6fbfb3;
 
-    --accent: #60a5fa;
-    --accent-2: #2dd4bf;
-
-    --good: #14b8a6;
-    --fair: #f59e0b;
-    --poor: #f87171;
-
-    --shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+    /* On the dark ground the offset can't be struck in the line colour — a
+       light shadow reads as a second border. The portfolio drops to black. */
+    --shadow: 4px 4px 0 rgba(0, 0, 0, 0.75);
+    --shadow-sm: 3px 3px 0 rgba(0, 0, 0, 0.75);
   }
 }
 
 * { box-sizing: border-box; }
 
+html { background: var(--bg); }
+
 body {
   margin: 0;
   padding: 0 1.2rem 4rem;
-  background: var(--paper);
+  background: var(--bg);
   color: var(--ink);
-  font: 16px/1.6 var(--font);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  font-variant-ligatures: none;
   -webkit-font-smoothing: antialiased;
 }
 
 .wrap { max-width: 780px; margin: 0 auto; }
 
+h1, h2 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
 /* --- masthead ----------------------------------------------------------- */
 
 .mv-masthead {
-  padding: 3.2rem 0 2.2rem;
+  padding: 3rem 0 2rem;
   text-align: center;
 }
 
 .mv-masthead h1 {
-  font-size: 2.441em;
-  font-weight: 700;
-  margin: 0 0 0.3em;
-  letter-spacing: -0.02em;
+  /* .page__title on the portfolio — mono headings at theme sizes run
+     enormous, so it pulls them back to 1.7em with a rule underneath. */
+  font-size: 1.7em;
+  margin: 0 0 0.5em;
+  display: inline-block;
+  border-bottom: 3px solid var(--line);
+  padding-bottom: 0.2em;
 }
 
+/* retro.css kills its own animated gradient headline right here, with the
+   note "the animated gradient headline was colour-as-emphasis, this is
+   weight instead". Same call. */
 .mv-tagline {
-  color: var(--ink-muted);
+  display: block;
   margin: 0;
-  font-size: 1.05em;
+  font-weight: 700;
+  color: var(--ink);
 }
 
 .mv-privacy {
   display: inline-block;
-  margin-top: 1.1em;
-  font-size: 0.8em;
-  font-weight: 600;
-  color: var(--accent-2);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 0.3em 0.9em;
+  margin-top: 1.2em;
+  font-size: 0.72em;
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: 0;
+  color: var(--ink);
+  background: var(--sunk);
+  border: 2px solid var(--line);
+  padding: 0.15em 0.55em;
 }
 
-/* --- cards -------------------------------------------------------------- */
+/* --- panels ------------------------------------------------------------- */
 
 .mv-card {
   position: relative;
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 1.8rem;
+  border: 3px solid var(--line);
   box-shadow: var(--shadow);
-  overflow: hidden;
+  padding: 1.5rem 1.6rem;
+  margin-bottom: 1.6em;
 }
 
+/* The accent bar retro.css puts across .mv-project-card. Static here: these
+   are page furniture, not a hoverable grid of links. */
 .mv-card::before {
   content: "";
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  height: 5px;
+  background: var(--accent);
 }
 
 .mv-section-title {
-  font-size: 1.15em;
+  font-size: 1.35em;
   font-weight: 700;
+  letter-spacing: -0.02em;
   margin: 0 0 1.1rem;
-  padding-bottom: 0.3em;
-  border-bottom: 2px solid var(--accent);
+  padding-bottom: 0.2em;
+  border-bottom: 4px solid var(--line);
+}
+
+/* The square accent tick stamped before every section title. */
+.mv-section-title::before {
+  content: "";
   display: inline-block;
+  width: 0.55em;
+  height: 0.55em;
+  margin-right: 0.45em;
+  background: var(--accent);
+  vertical-align: 0.05em;
+}
+
+/* --- links -------------------------------------------------------------- */
+
+a, a:visited {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+a:hover, a:focus {
+  background: var(--ink);
+  color: var(--bg);
+  text-decoration: none;
+}
+
+a:focus-visible,
+button:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.mv-drop:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* --- form --------------------------------------------------------------- */
@@ -138,140 +197,167 @@ body {
   font-size: 0.8em;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--ink-muted);
+  letter-spacing: 0;
+  color: var(--muted);
   margin-bottom: 0.5em;
 }
 
-.mv-field {
-  margin-bottom: 1.6rem;
-}
+.mv-field { margin-bottom: 1.5rem; }
 
 select, textarea {
   width: 100%;
   font: inherit;
   color: var(--ink);
-  background: var(--paper);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.7em 0.9em;
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: 0;
+  padding: 0.5em 0.7em;
+  box-shadow: var(--shadow-sm);
 }
 
-select:focus-visible,
-textarea:focus-visible,
-.mv-drop:focus-visible,
-button:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-option:disabled { color: var(--ink-muted); }
+option:disabled { color: var(--muted); }
 
 .mv-drop {
   display: block;
   width: 100%;
-  border: 2px dashed var(--border);
-  border-radius: 10px;
-  background: var(--paper);
-  padding: 2.4rem 1rem;
+  border: 3px dashed var(--line);
+  background: var(--sunk);
+  padding: 2.2rem 1rem;
   text-align: center;
   cursor: pointer;
-  color: var(--ink-muted);
-  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+  color: var(--muted);
+  /* steps() rather than a smooth ease — retro.css animates in chunks. */
+  transition: background 0.12s steps(2), color 0.12s steps(2);
+}
+
+.mv-drop strong {
+  display: block;
+  color: var(--ink);
+  font-weight: 700;
+  margin-bottom: 0.2em;
 }
 
 .mv-drop:hover,
 .mv-drop.is-over {
-  border-color: var(--accent);
-  color: var(--accent);
+  background: var(--ink);
+  color: var(--bg);
+  border-style: solid;
 }
 
-.mv-drop strong { display: block; color: var(--ink); font-size: 1.05em; margin-bottom: 0.2em; }
-.mv-drop.is-over { background: color-mix(in srgb, var(--accent) 6%, var(--surface)); }
+.mv-drop:hover strong,
+.mv-drop.is-over strong { color: var(--bg); }
 
 .mv-linkbtn {
   background: none;
   border: none;
   padding: 0;
-  margin-top: 1.1rem;
+  margin-top: 1rem;
   font: inherit;
-  font-size: 0.9em;
-  color: var(--accent);
+  color: var(--ink);
   text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
   cursor: pointer;
 }
 
+.mv-linkbtn:hover {
+  background: var(--ink);
+  color: var(--bg);
+  text-decoration: none;
+}
+
+/* Buttons are retro.css's .btn: surface plate, hard border, offset shadow,
+   and a press that moves the plate into its own shadow. */
 .mv-btn {
   font: inherit;
-  font-weight: 600;
-  color: #fff;
-  background: var(--accent);
-  border: none;
-  border-radius: 8px;
-  padding: 0.75em 1.6em;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: 0;
+  box-shadow: var(--shadow-sm);
+  padding: 0.5em 1.2em;
   cursor: pointer;
-  transition: transform 0.15s ease, filter 0.15s ease;
+  transition: background 0.12s steps(2), color 0.12s steps(2);
 }
 
-.mv-btn:hover { transform: translateY(-2px); filter: brightness(1.08); }
-.mv-btn--ghost { background: none; color: var(--accent); border: 1px solid var(--border); }
+.mv-btn:hover { background: var(--ink); color: var(--bg); }
+.mv-btn:active { transform: translate(2px, 2px); box-shadow: none; }
 
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
-  .mv-btn:hover { transform: none; }
 }
 
 /* --- status ------------------------------------------------------------- */
 
+/* retro.css's .notice: sunk ground, hard border, one fat edge. */
 .mv-status {
   margin-top: 1.2rem;
-  padding: 0.9em 1.1em;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--fair);
-  background: var(--paper);
-  font-size: 0.92em;
-  color: var(--ink-muted);
+  padding: 0.7em 1em;
+  background: var(--sunk);
+  border: 3px solid var(--line);
+  border-left-width: 10px;
+  box-shadow: var(--shadow-sm);
+  font-size: 0.95em;
+  color: var(--ink);
 }
 
-.mv-status--error { border-left-color: var(--poor); color: var(--ink); }
+.mv-status--error {
+  border-left-color: var(--accent);
+  font-weight: 700;
+}
 
 /* --- hero score --------------------------------------------------------- */
 
 .mv-hero {
   text-align: center;
-  padding: 0.6rem 0 1.8rem;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 1.8rem;
+  padding: 0.4rem 0 1.5rem;
+  border-bottom: 3px solid var(--line);
+  margin-bottom: 1.5rem;
 }
 
 .mv-hero-number {
-  font-size: 4.6rem;
+  font-size: 3.8rem;
   font-weight: 700;
   line-height: 1;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
 }
 
-.mv-hero-number span { font-size: 0.34em; font-weight: 600; color: var(--ink-muted); }
+.mv-hero-number span {
+  font-size: 0.3em;
+  font-weight: 700;
+  color: var(--muted);
+}
 
 .mv-hero-verdict {
-  font-size: 1.1em;
+  font-size: 1.05em;
   font-weight: 700;
-  margin-top: 0.3em;
+  text-transform: uppercase;
+  margin-top: 0.4em;
 }
 
-.mv-hero-sub { color: var(--ink-muted); font-size: 0.92em; margin-top: 0.4em; }
+.mv-hero-sub {
+  color: var(--muted);
+  font-size: 0.8em;
+  margin-top: 0.5em;
+}
 
 /* --- score bars --------------------------------------------------------- */
 /* Magnitude against a fixed 0–100 scale, so the bar is the whole chart: no
-   axis, no gridlines, no legend (one series). There is no benchmark reference
-   line because scores are already normalised so that meeting the benchmark IS
-   100 — a marker would sit at the end of every track. The raw figure and the
+   axis, no gridlines, no legend (one series). No benchmark reference line,
+   because scores are normalised so that meeting the benchmark IS 100 — a
+   marker would sit at the end of every track. The raw figure and the
    benchmark it is measured against are stated in .mv-dim-detail instead.
-   Colour carries the band, and .mv-verdict repeats it as text so the band is
-   never conveyed by colour alone. */
 
-.mv-dim { margin-bottom: 1.7rem; }
+   The band is carried by fill PATTERN, not hue: solid, half dither, quarter
+   dither, all struck in ink. That answers the theme's "colour only as an
+   accent" rule and the accessibility one in the same stroke — the bands stay
+   distinct in greyscale and to a colourblind reader, and .mv-verdict repeats
+   the band as a word regardless. Dither as a value ramp is also period
+   correct: it is how 16-bit desktops shaded with no palette to spend. */
+
+.mv-dim { margin-bottom: 1.5rem; }
 
 .mv-dim-head {
   display: flex;
@@ -286,42 +372,68 @@ option:disabled { color: var(--ink-muted); }
 .mv-dim-score {
   font-variant-numeric: tabular-nums;
   font-weight: 700;
-  font-size: 1.05em;
 }
 
 .mv-verdict {
-  font-size: 0.7em;
+  display: inline-block;
+  font-size: 0.72em;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 0.2em 0.6em;
-  border-radius: 999px;
+  letter-spacing: 0;
+  padding: 0.1em 0.5em;
   margin-left: 0.5em;
   vertical-align: middle;
-  color: #fff;
+  border: 2px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
 }
 
 .mv-track {
   position: relative;
-  height: 12px;
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--ink) 8%, var(--surface));
+  height: 16px;
+  background: var(--sunk);
+  border: 2px solid var(--line);
   overflow: hidden;
 }
 
 .mv-fill {
   height: 100%;
-  border-radius: 6px;
-  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  background: var(--ink);
+  transition: width 0.4s steps(12);
 }
 
-.mv-dim-detail { font-size: 0.85em; color: var(--ink-muted); margin: 0.6em 0 0; }
+/* half dither */
+.mv-fill--fair {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--ink) 0 3px,
+    transparent 3px 6px
+  );
+}
 
+/* quarter dither */
+.mv-fill--poor {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--ink) 0 2px,
+    transparent 2px 8px
+  );
+}
+
+.mv-dim-detail {
+  font-size: 0.8em;
+  color: var(--muted);
+  margin: 0.6em 0 0;
+}
+
+/* retro.css's blockquote: fat accent edge, sunk ground, italic. */
 .mv-tip {
-  font-size: 0.9em;
-  margin: 0.5em 0 0;
-  padding-left: 0.9em;
-  border-left: 2px solid var(--border);
+  font-size: 0.95em;
+  margin: 0.6em 0 0;
+  padding: 0.5em 0.9em;
+  background: var(--sunk);
+  border-left: 10px solid var(--accent);
+  font-style: italic;
 }
 
 /* --- pills & footer ----------------------------------------------------- */
@@ -329,24 +441,31 @@ option:disabled { color: var(--ink-muted); }
 .mv-pill-row { display: flex; flex-wrap: wrap; gap: 0.5em; margin-top: 0.8em; }
 
 .mv-pill {
-  font-size: 0.8em;
-  padding: 0.3em 0.8em;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  color: var(--ink-muted);
+  font-size: 0.72em;
+  font-weight: 700;
+  letter-spacing: 0;
+  padding: 0.1em 0.5em;
+  border: 2px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  transition: background 0.12s steps(2), color 0.12s steps(2);
 }
 
-.mv-actions { display: flex; gap: 0.8em; flex-wrap: wrap; margin-top: 2rem; }
+.mv-pill:hover { background: var(--ink); color: var(--bg); }
+
+.mv-actions { display: flex; gap: 0.8em; flex-wrap: wrap; margin-top: 1.8rem; }
 
 .mv-foot {
-  margin-top: 2.5rem;
-  font-size: 0.82em;
-  color: var(--ink-muted);
+  margin-top: 2rem;
+  padding-top: 1.2rem;
+  border-top: 3px solid var(--line);
+  font-size: 0.8em;
+  color: var(--muted);
   text-align: center;
   line-height: 1.7;
 }
 
-.mv-foot a { color: var(--accent); }
+.mv-foot a { color: var(--ink); }
 
 [hidden] { display: none !important; }
 

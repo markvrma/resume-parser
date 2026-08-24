@@ -80,24 +80,26 @@ async function pdfToText(file) {
 // Bands are derived here rather than stored on the score object — a verdict is
 // just a threshold, and duplicating it into score.js would mean two places to
 // change when the wording moves.
+// The band is carried by fill pattern, not hue — see the score-bar note in
+// styles.css. So this hands back a class modifier and lets CSS own the look.
 function band(score) {
-  if (score >= 80) return { label: "Strong", color: "var(--good)" };
-  if (score >= 55) return { label: "Developing", color: "var(--fair)" };
-  return { label: "Needs work", color: "var(--poor)" };
+  if (score >= 80) return { label: "Strong", mod: "good" };
+  if (score >= 55) return { label: "Developing", mod: "fair" };
+  return { label: "Needs work", mod: "poor" };
 }
 
 function renderDimension(dim) {
-  const { label: verdict, color } = band(dim.score);
+  const { label: verdict, mod } = band(dim.score);
   const el = document.createElement("div");
   el.className = "mv-dim";
   el.innerHTML = `
     <div class="mv-dim-head">
-      <span class="mv-dim-name">${dim.label}<span class="mv-verdict" style="background:${color}">${verdict}</span></span>
-      <span class="mv-dim-score">${dim.score}<span style="font-weight:400;color:var(--ink-muted)">/100</span></span>
+      <span class="mv-dim-name">${dim.label}<span class="mv-verdict">${verdict}</span></span>
+      <span class="mv-dim-score">${dim.score}<span style="font-weight:400;color:var(--muted)">/100</span></span>
     </div>
     <div class="mv-track" role="img"
          aria-label="${dim.label}: ${dim.score} out of 100 — ${verdict}">
-      <div class="mv-fill" style="width:0%;background:${color}"></div>
+      <div class="mv-fill mv-fill--${mod}" style="width:0%"></div>
     </div>
     <p class="mv-dim-detail"></p>
     <p class="mv-tip"></p>
@@ -118,9 +120,7 @@ function render(result) {
   const overall = band(result.overall);
 
   els.heroScore.textContent = result.overall;
-  els.heroScore.style.color = overall.color;
   els.heroVerdict.textContent = overall.label;
-  els.heroVerdict.style.color = overall.color;
   els.heroSub.textContent =
     `Weighted across ${result.dimensions.length} areas, benchmarked against ${BENCHMARK.label}.`;
 
