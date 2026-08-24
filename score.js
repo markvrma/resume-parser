@@ -258,13 +258,27 @@ export function scoreImpact(doc, bench = BENCHMARK) {
   };
 }
 
+// Keyword hits must be whole tokens. Plain substring matching credited the
+// "languages" category to any resume containing the letter r — "r" is on the
+// list — and credited it again for Django, which contains "go". Every resume
+// ever written scored a free category.
+//
+// The boundary class excludes + # . / so that c++, c#, next.js and ci/cd match
+// as themselves rather than being split at their own punctuation.
+const BOUNDARY = "[^a-z0-9+#./]";
+
+const keywordHit = (haystack, keyword) => {
+  const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`(^|${BOUNDARY})${escaped}($|${BOUNDARY})`, "i").test(haystack);
+};
+
 export function scoreBreadth(doc, bench = BENCHMARK) {
   const haystack = (doc.text || "").toLowerCase();
   const covered = [];
   const missing = [];
 
   for (const [category, keywords] of Object.entries(bench.techCategories)) {
-    const hits = keywords.filter((k) => haystack.includes(k));
+    const hits = keywords.filter((k) => keywordHit(haystack, k));
     (hits.length ? covered : missing).push(category);
   }
 

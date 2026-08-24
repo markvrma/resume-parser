@@ -78,6 +78,40 @@
       <button type="button" class="mv-btn" id="again">Check another resume</button>
     </div>
   </section>
+
+  <!-- ---------------------------------------------------------------- -->
+  <!-- State 3: job match (optional, model-backed)                       -->
+  <!-- ---------------------------------------------------------------- -->
+  <section id="match-view" class="mv-card" hidden>
+    <h2 class="mv-section-title">Match against a job</h2>
+
+    <p class="mv-note">
+      The score above reads the <em>shape</em> of your resume. This reads its
+      <em>meaning</em>: it takes each requirement in a posting and asks whether
+      anything in your resume is evidence for it. Runs a small open-weights
+      language model — <strong>87&nbsp;MB, downloaded once</strong> and cached by
+      your browser. Your resume still never leaves the page.
+    </p>
+
+    <div class="mv-field">
+      <label class="mv-label" for="jd">Paste the job description</label>
+      <textarea id="jd" rows="8" placeholder="Paste the full posting — requirements, responsibilities and all. Boilerplate is filtered out."></textarea>
+    </div>
+
+    <div class="mv-actions">
+      <button type="button" class="mv-btn" id="run-match">Check the match</button>
+    </div>
+
+    <p class="mv-status" id="match-status" hidden role="status" aria-live="polite"></p>
+
+    <div id="match-results" hidden>
+      <div class="mv-hero">
+        <div class="mv-hero-number"><span id="cov-score">0</span><span>% covered</span></div>
+        <p class="mv-hero-sub" id="cov-sub"></p>
+      </div>
+      <div id="reqs"></div>
+    </div>
+  </section>
   </main>
 
   <p class="mv-foot">

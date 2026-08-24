@@ -3,6 +3,9 @@
 
 import * as pdfjs from "./vendor/pdf.min.mjs";
 import { parseResume, scoreResume, BENCHMARK } from "./score.js";
+import {
+  MATCH, extractRequirements, matchRequirements, coverageScore, buildPremises,
+} from "./match.js";
 
 pdfjs.GlobalWorkerOptions.workerSrc = "./vendor/pdf.worker.min.mjs";
 
@@ -31,7 +34,19 @@ const els = {
   heroSub: $("hero-sub"),
   dims: $("dims"),
   again: $("again"),
+  matchView: $("match-view"),
+  jd: $("jd"),
+  runMatch: $("run-match"),
+  matchStatus: $("match-status"),
+  matchResults: $("match-results"),
+  covScore: $("cov-score"),
+  covSub: $("cov-sub"),
+  reqs: $("reqs"),
 };
+
+// The parsed resume from the current run, kept so the job matcher can reuse it
+// instead of re-reading the file.
+let currentDoc = null;
 
 // --- status line ----------------------------------------------------------
 
@@ -128,6 +143,7 @@ function render(result) {
 
   els.inputView.hidden = true;
   els.resultsView.hidden = false;
+  els.matchView.hidden = false;
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -135,6 +151,7 @@ function render(result) {
 
 function scoreText(text) {
   const doc = parseResume(text);
+  currentDoc = doc;
   if (!doc.words) {
     setStatus("No text found. Paste your resume text in instead.", true);
     els.pasteField.hidden = false;
@@ -187,7 +204,146 @@ async function handleFile(file) {
   }
 }
 
+
+// --- job match ------------------------------------------------------------
+// The model is ~87MB and most visitors never paste a job description, so
+// nothing here is imported until the button is pressed. The base score stays a
+// zero-dependency, instant, offline rubric.
+
+const TRANSFORMERS_URL =
+  "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0/dist/transformers.min.js";
+
+let classifierPromise = null;
+
+function setMatchStatus(message, isError = false) {
+  if (!message) {
+    els.matchStatus.hidden = true;
+    return;
+  }
+  els.matchStatus.hidden = false;
+  els.matchStatus.textContent = message;
+  els.matchStatus.classList.toggle("mv-status--error", isError);
+}
+
+/** Load once per page, reuse after. Resolves to classify(premise, labels). */
+function getClassifier() {
+  if (classifierPromise) return classifierPromise;
+
+  classifierPromise = (async () => {
+    setMatchStatus("Loading the model — 87 MB, once. Your browser caches it after this.");
+    const { pipeline } = await import(/* @vite-ignore */ TRANSFORMERS_URL);
+
+    // WASM, deliberately, even where WebGPU is available. Measured on this
+    // workload WebGPU ran ~660ms per forward pass against WASM's ~49ms — a
+    // 13x penalty. The model is small enough that per-dispatch GPU overhead
+    // dominates the arithmetic, so the accelerator is pure cost. The whole
+    // 12-requirement analysis is ~5s on WASM and was ~80s on WebGPU.
+    const zs = await pipeline("zero-shot-classification", MATCH.model, {
+      dtype: "q8",
+      device: "wasm",
+      progress_callback: (p) => {
+        if (p.status === "progress" && p.total) {
+          const pct = Math.round((p.loaded / p.total) * 100);
+          setMatchStatus(`Downloading the model… ${pct}%`);
+        }
+      },
+    });
+
+    return async (premise, labels) => {
+      const out = await zs(premise, labels, {
+        hypothesis_template: MATCH.hypothesisTemplate,
+        multi_label: true,
+      });
+      // The pipeline returns labels ordered by score, not in the order they
+      // were given. Realign here, or every requirement gets another
+      // requirement's score once more than one label is passed at a time.
+      const byLabel = new Map(out.labels.map((l, i) => [l, out.scores[i]]));
+      return labels.map((l) => byLabel.get(l) ?? 0);
+    };
+  })();
+
+  // A failed load must not poison every later attempt.
+  classifierPromise.catch(() => {
+    classifierPromise = null;
+  });
+
+  return classifierPromise;
+}
+
+const BAND_LABEL = { covered: "Covered", partial: "Partial", missing: "Missing" };
+
+function renderRequirement(m) {
+  const el = document.createElement("div");
+  el.className = "mv-req";
+  el.innerHTML = `
+    <div class="mv-req-head">
+      <span class="mv-verdict mv-verdict--${m.band}">${BAND_LABEL[m.band]}</span>
+      <span class="mv-req-text"></span>
+    </div>
+    <p class="mv-req-evidence" hidden></p>
+  `;
+  // textContent throughout: both strings come from pasted text.
+  el.querySelector(".mv-req-text").textContent = m.requirement;
+  if (m.evidence) {
+    const ev = el.querySelector(".mv-req-evidence");
+    ev.hidden = false;
+    ev.textContent = `Best evidence: ${m.evidence}`;
+  }
+  return el;
+}
+
+async function runMatch() {
+  const jd = els.jd.value.trim();
+  if (jd.length < 120) {
+    setMatchStatus("Paste the full job description — that is too short to read requirements from.", true);
+    return;
+  }
+  if (!currentDoc) {
+    setMatchStatus("Score a resume first.", true);
+    return;
+  }
+
+  const requirements = extractRequirements(jd);
+  if (!requirements.length) {
+    setMatchStatus("No requirements could be read out of that. Paste the body of the posting, not just the title.", true);
+    return;
+  }
+
+  const premises = buildPremises(currentDoc);
+  els.runMatch.disabled = true;
+  els.matchResults.hidden = true;
+
+  try {
+    const classify = await getClassifier();
+
+    const matches = await matchRequirements(
+      requirements,
+      premises,
+      classify,
+      MATCH,
+      (done) => setMatchStatus(`Checking requirements… ${Math.round(done * 100)}%`),
+    );
+
+    const coverage = coverageScore(matches);
+    const missing = matches.filter((m) => m.band === "missing").length;
+
+    els.covScore.textContent = coverage;
+    els.covSub.textContent =
+      `${requirements.length} requirements read from the posting` +
+      (missing ? `, ${missing} with no evidence in your resume.` : ", all with some evidence in your resume.");
+    els.reqs.replaceChildren(...matches.map(renderRequirement));
+    els.matchResults.hidden = false;
+    setMatchStatus("");
+  } catch (err) {
+    setMatchStatus(`Couldn't run the match (${err.message || err}). The model download may have been blocked.`, true);
+  } finally {
+    els.runMatch.disabled = false;
+  }
+}
+
 // --- events ---------------------------------------------------------------
+
+els.runMatch.addEventListener("click", runMatch);
 
 els.file.addEventListener("change", (e) => handleFile(e.target.files[0]));
 
@@ -207,10 +363,15 @@ els.scorePaste.addEventListener("click", () => {
 
 els.again.addEventListener("click", () => {
   els.resultsView.hidden = true;
+  els.matchView.hidden = true;
+  els.matchResults.hidden = true;
   els.inputView.hidden = false;
   els.file.value = "";
   els.paste.value = "";
+  els.jd.value = "";
+  currentDoc = null;
   setStatus("");
+  setMatchStatus("");
   window.scrollTo({ top: 0, behavior: "smooth" });
 });
 

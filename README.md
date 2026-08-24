@@ -4,11 +4,16 @@ Score a software engineering resume against a documented hiring rubric, in the
 browser. Upload a PDF, get an overall score out of 100, a breakdown across four
 areas, and a specific fix for each one.
 
-**Your resume never leaves the page.** 
+Optionally, paste a job description and it tells you which of its requirements
+your resume actually shows evidence for, using a small open-weights model that
+runs in your browser.
+
+**Your resume never leaves the page.** The model file is the only thing fetched
+from the network, and only if you ask for a match.
 
 ```
 open index.html          # works straight off disk, no build, no server
-node --test score.test.js
+node --test               # 19 tests, no model download required
 ```
 
 ---
@@ -44,11 +49,83 @@ because it is the one thing every published guide agrees on.
 
 ---
 
+## Job matching
+
+The rubric measures the *shape* of a resume. Whether you have what a specific
+job asks for is a question about meaning, so it takes a model.
+
+Paste a posting; it pulls out the requirement lines and, for each, asks whether
+anything in your resume is evidence for it — `Covered`, `Partial` or `Missing`,
+with the best-matching line shown underneath.
+
+**Model:** [`Xenova/nli-deberta-v3-xsmall`](https://huggingface.co/Xenova/nli-deberta-v3-xsmall),
+~87 MB quantized (int8), run through
+[Transformers.js](https://github.com/huggingface/transformers.js). Downloaded
+once on first use and cached by the browser; never fetched if you don't use the
+feature.
+
+### Why entailment and not embeddings
+
+The obvious build is to embed requirements and bullets and rank by cosine
+similarity. Measured on a real posting, that ranks a requirement the resume
+plainly does **not** meet above ones it plainly does:
+
+| Requirement | Truth | Cosine (MiniLM-L6) |
+|---|---|---|
+| Five years managing a team of designers | missing | **0.388** |
+| Exposure to LLMs, prompting, retrieval, agents | covered | **0.215** |
+| Solid fundamentals in a production language | covered | 0.238 |
+
+A bi-encoder scores topical resemblance, and "five years managing designers"
+resembles "software engineer, two years" as a *sentence*. Any threshold over
+that tells people confident falsehoods about their own resume.
+
+Natural language inference asks the question actually meant: taking a resume
+line as the premise, does "the candidate's background provides evidence for X"
+follow? On the same cases that separates cleanly — covered 0.63–1.00, missing
+0.07–0.21 — and the bands are cut from that gap, set to under-claim rather than
+over-claim.
+
+The hypothesis wording was chosen by measurement, not taste. Against a labelled
+set, `"The candidate's background provides evidence for: {}"` separated covered
+from missing by **0.42**; `"This person has professional experience with {}"`
+managed 0.29, and `"This resume demonstrates: {}"` collapsed to 0.02.
+
+### What it matches against
+
+Not just bullets. Matching bullets alone scored "roughly 1–3 years of software
+engineering experience" as **missing** against a resume with exactly that,
+because no bullet states a tenure — it lives in the dates. So two facts are
+synthesized from what was already parsed and added to the pool: a tenure line
+derived from the years in the experience section, and the skills section. Both
+are assembled from the resume, never invented.
+
+### Limits of the match
+
+- **Numeric requirements are its weak spot.** "1–3 years" against "2 years"
+  needs arithmetic, and NLI models reason about numbers poorly. It usually
+  lands, but it is the least reliable class.
+- **It is a fuzzy signal, not a verdict.** Bands near a threshold flip on
+  wording. Treat `Missing` as "worth a second look", not as proof.
+- **Attribution is noisier than the score.** The band is more trustworthy than
+  which line it picked as evidence.
+- **Only the first 12 requirements** are read, and the first 20 resume lines
+  matched, to bound runtime.
+
+### Why WASM and not WebGPU
+
+Measured on this workload, WebGPU cost ~660 ms per forward pass against WASM's
+~49 ms. The model is small enough that per-dispatch GPU overhead dominates the
+arithmetic, so the accelerator is pure cost. Inference is pinned to WASM.
+
+---
+
 ## How it works
 
 ```
-index.html     markup, two states toggled with the hidden attribute
-app.js         pdf.js -> text, and result -> DOM. Nothing else.
+index.html     markup, three states toggled with the hidden attribute
+app.js         pdf.js -> text, result -> DOM, and the model's lifetime.
+match.js       job-description matching. Pure, with the classifier injected.
 score.js       parseResume() and scoreResume(). Pure, no DOM, no I/O.
 score.test.js  node:test. Two inline fixtures, strong vs weak.
 styles.css     design tokens + the ported mv- components
