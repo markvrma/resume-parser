@@ -4,9 +4,7 @@ Score a software engineering resume against a documented hiring rubric, in the
 browser. Upload a PDF, get an overall score out of 100, a breakdown across four
 areas, and a specific fix for each one.
 
-**Your resume never leaves the page.** There is no backend, no upload endpoint,
-and no analytics. PDF text extraction and scoring both run client-side; the
-whole app is five files and one vendored library.
+**Your resume never leaves the page.** 
 
 ```
 open index.html          # works straight off disk, no build, no server
@@ -17,11 +15,7 @@ node --test score.test.js
 
 ## Methodology
 
-**Read this before trusting a number.**
-
-The benchmark is a **hand-written rubric**. It is not derived from real
-engineers' resumes, and no resume — yours or anyone's — is stored or compared
-against a corpus. There is no dataset behind this. Every target in
+The benchmark is a **hand-written rubric**. Every target in
 [`score.js`](score.js) is a rule of thumb drawn from public hiring guidance:
 
 | Dimension | Weight | Target | Where the target comes from |
@@ -36,13 +30,10 @@ because it is the one thing every published guide agrees on.
 
 ### What this does not do
 
-- **It cannot tell you whether you'll get the interview.** It measures how a
-  resume is *written*, not what you've done.
-- **Keyword stuffing beats it.** Pasting a list of technologies raises technical
-  breadth. There's no defence against this, and building one isn't worth it for
-  a tool you run on yourself.
+- **It cannot tell you whether you'll get the interview.** duh
+- **Keyword stuffing beats it.** You are grading your own resume. Don't lie to yourself.
 - **Multi-column layouts may extract out of order.** pdf.js returns text in draw
-  order, not reading order. Column reconstruction isn't attempted — if the
+  order, not reading order. Column reconstruction isn't attempted, if the
   results look scrambled, use the paste box.
 - **Scanned or image-only PDFs contain no text.** There is no OCR. The app
   detects this (under 200 characters extracted) and offers the paste box.
@@ -76,19 +67,6 @@ treated as a bullet so the resume still gets scored instead of reading as empty.
 Scores are normalised so that meeting the benchmark is 100 — there is no
 percentile math, because a weighted mean of percentiles is not a percentile and
 the precision would be fake.
-
-## Deploying
-
-Static — no build step, no configuration. On Vercel, import the repo and accept
-the defaults (framework "Other", no build command, repository root as output).
-
-## History
-
-This repo previously held a Python/Streamlit resume parser built on three
-HuggingFace transformer models. Two of the three were downloaded, instantiated,
-and never called; the third did section classification that a regex does
-deterministically and several orders of magnitude faster. The rewrite dropped
-~1.5 GB of model weights and the entire backend.
 
 ## License
 
